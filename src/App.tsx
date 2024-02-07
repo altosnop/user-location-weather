@@ -1,9 +1,19 @@
 import React from 'react';
+import { Route, Routes } from 'react-router-dom';
+import MainPage from './pages/MainPage';
+import SavedCardsPage from './pages/SavedCardsPage';
+import NotFoundPage from './pages/NotFoundPage';
+import Menu from './components/Menu';
 
 function App() {
   return (
     <div>
-      <h1 className="text-3xl font-bold text-center">User Location Weather</h1>
+      <Menu />
+      <Routes>
+        <Route path="/" element={<MainPage />} />
+        <Route path="/saved-cards" element={<SavedCardsPage />} />
+        <Route path="*" element={<NotFoundPage />} />
+      </Routes>
     </div>
   );
 }
