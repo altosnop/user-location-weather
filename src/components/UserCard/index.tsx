@@ -1,5 +1,9 @@
 import React from 'react';
 import { User, Weather } from '../../types/types';
+import { MapContainer, Marker, TileLayer } from 'react-leaflet';
+import { Icon, LatLngExpression } from 'leaflet';
+import 'leaflet/dist/leaflet.css';
+import './styles.css';
 
 interface UserCardProps {
   user: User;
@@ -23,29 +27,32 @@ const UserCard = ({
     localStorage.setItem('userCardsData', JSON.stringify(updatedCards));
   };
 
+  const avatarIcon = new Icon({
+    iconUrl: user.picture.large
+      ? user.picture.large
+      : 'https://cdn-icons-png.freepik.com/512/3082/3082383.png',
+    iconSize: [38, 38],
+  });
+
+  const position: LatLngExpression | undefined = [
+    Number(user.location.coordinates.latitude),
+    Number(user.location.coordinates.longitude),
+  ];
+
   return (
     <div>
       {loading ? (
         <h1>Loading...</h1>
       ) : (
-        <div className="max-w-2xl overflow-hidden bg-white rounded-lg shadow-md mr-10">
-          <div className="relative">
-            <img
-              className="object-cover w-full h-64"
-              src="https://s9.travelask.ru/uploads/post/000/031/075/main_image/facebook-8914d62843be1ab0fb0b70e9f8199732.jpg"
-              alt="Article"
-            />
-
-            {saveBtn && (
-              <button
-                className="px-6 py-2 font-medium tracking-wide text-white capitalize transition-colors duration-300 transform bg-blue-600 rounded-lg hover:bg-blue-500 focus:outline-none focus:ring focus:ring-blue-300 focus:ring-opacity-80 absolute top-5 right-5"
-                onClick={() => {
-                  onCardSave(user, weather);
-                }}
-              >
-                Save
-              </button>
-            )}
+        <div className="max-w-2xl overflow-hidden bg-white rounded-lg shadow-md mr-10 mb-5">
+          <div>
+            <MapContainer center={position} zoom={5}>
+              <TileLayer
+                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              />
+              <Marker position={position} icon={avatarIcon}></Marker>
+            </MapContainer>
           </div>
 
           <div className="p-6">
@@ -91,6 +98,16 @@ const UserCard = ({
               </div>
             </div>
           </div>
+          {saveBtn && (
+            <button
+              className="px-6 py-2 font-medium tracking-wide text-white capitalize transition-colors duration-300 transform bg-blue-600 rounded-lg hover:bg-blue-500 focus:outline-none focus:ring focus:ring-blue-300 focus:ring-opacity-80 ml-6 mb-6"
+              onClick={() => {
+                onCardSave(user, weather);
+              }}
+            >
+              Save
+            </button>
+          )}
         </div>
       )}
     </div>
