@@ -1,39 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import UserCard from '../../components/UserCard';
-
-export interface User {
-  id: {
-    name: string;
-  };
-  name: {
-    first: string;
-    last: string;
-  };
-  gender: string;
-  picture: {
-    large: string;
-  };
-  email: string;
-  location: {
-    city: string;
-    country: string;
-    coordinates: {
-      latitude: string;
-      longitude: string;
-    };
-  };
-}
-
-export interface Weather {
-  current_weather: {
-    temperature: string;
-  };
-  hourly: {
-    time: string[];
-    temperature_2m: number[];
-  };
-}
+import { User, Weather } from '../../types/types';
 
 const MainPage = () => {
   const [user, setUser] = useState<User>({
@@ -67,22 +35,30 @@ const MainPage = () => {
       temperature_2m: [],
     },
   });
+  const [loading, setLoading] = useState<boolean>(false);
 
   const getData = async () => {
-    const userData = await axios.get<{ results: User[] }>(
-      'https://randomuser.me/api/',
-    );
+    setLoading(true);
 
-    const latitude = userData.data.results[0].location.coordinates.latitude;
-    const longitude = userData.data.results[0].location.coordinates.longitude;
+    try {
+      const userData = await axios.get<{ results: User[] }>(
+        'https://randomuser.me/api/',
+      );
 
-    setUser(userData.data.results[0]);
+      const latitude = userData.data.results[0].location.coordinates.latitude;
+      const longitude = userData.data.results[0].location.coordinates.longitude;
 
-    const weatherData =
-      await axios.get<Weather>(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true&hourly=temperature_2m
-    `);
+      const weatherData =
+        await axios.get<Weather>(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true&hourly=temperature_2m
+      `);
 
-    setWeather(weatherData.data);
+      setUser(userData.data.results[0]);
+      setWeather(weatherData.data);
+      setLoading(false);
+    } catch (error) {
+      console.log('Error!');
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -90,8 +66,12 @@ const MainPage = () => {
   }, []);
 
   return (
-    <div>
-      <UserCard user={user} weather={weather} />
+    <div className="p-5">
+      {loading ? (
+        <h1>Loading...</h1>
+      ) : (
+        <UserCard user={user} weather={weather} loading={loading} />
+      )}
     </div>
   );
 };
